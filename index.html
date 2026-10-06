@@ -146,6 +146,17 @@
       }
     }
 
+    TCN.watchState((next) => {
+      const changed = !state || state.groups !== next.groups || state.session !== next.session;
+      state = next;
+      // The host started over since this phone signed in: start over here too.
+      if (guests.some((guest) => guest.session !== null && guest.session !== next.session)) {
+        guests = [];
+        saveGuests();
+      }
+      if (changed) render(true);
+    });
+
     let slowTimer;
 
     function setBusy(busy) {

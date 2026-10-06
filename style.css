@@ -335,6 +335,16 @@ form .primary[disabled]::after,
   color: var(--wine);
 }
 
+/* shown in the ring until the host announces the groups */
+.ring-wait {
+  position: relative;
+  padding-left: 0.6em;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 1.5rem;
+  color: var(--stain);
+}
+
 .note {
   margin: 0;
   font-family: var(--serif);
