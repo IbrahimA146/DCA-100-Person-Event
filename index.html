@@ -30,6 +30,15 @@
         <path d="M10 57h38"/>
       </svg>
     </div>
+
+    <form id="signin" novalidate hidden>
+      <p class="lede">Write your name to sign in and find your group for the evening.</p>
+      <label for="name">Your name</label>
+      <input id="name" name="name" type="text" autocomplete="name" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="go" maxlength="40">
+      <p class="error" id="error" role="alert" hidden>Please write your name first.</p>
+      <button class="primary" id="go" type="submit">Sign in</button>
+      <button class="link" id="back" type="button" hidden>Back</button>
+    </form>
   </main>
 
   <p class="colophon">Dialogue Student Association · UT Austin</p>
