@@ -429,3 +429,51 @@ form .primary[disabled]::after,
   color: #a08a76;
 }
 
+/* ---------- host page ---------- */
+
+.host-wrap {
+  display: grid;
+  gap: 1.5rem;
+  width: min(100%, 26rem);
+}
+
+.host-wrap .card {
+  width: 100%;
+}
+
+.poster-lede {
+  margin: 0.6rem 0 1.2rem;
+}
+
+.qr {
+  width: min(100%, 17rem);
+  margin: 0 auto;
+  padding: 1rem;
+  background: #fffcf5;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+
+.qr svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.qr svg rect {
+  fill: #fffcf5;
+}
+
+.qr svg path {
+  fill: #2a1a12;
+}
+
+.url {
+  margin: 0.8rem 0 0;
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  overflow-wrap: anywhere;
+}
+
