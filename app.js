@@ -83,6 +83,94 @@
   const takeNumber = (session) =>
     withRetry(() => request(`hit/${NS}/checkin-${session}`).then(numberIn), 20000);
 
+  // Calls onValue(n) with a value's current number on connecting, and again
+  // the moment it changes. onHealth(true/false) reports whether the line is
+  // up. Listens only while the page is on screen: a pocketed phone drops the
+  // line and catches up when it's looked at again. Returns a function that
+  // stops watching.
+  function watch(key, onValue, onHealth = () => {}) {
+    let source = null;
+    let timer = null;
+    let failures = 0;
+    let run = 0; // goes up whenever the line is dropped, so stale work can tell
+
+    function stop() {
+      run++;
+      clearTimeout(timer);
+      if (source) source.close();
+      source = null;
+    }
+
+    function after(ms, next) {
+      clearTimeout(timer);
+      timer = setTimeout(next, ms);
+    }
+
+    function listen() {
+      stop();
+      if (document.hidden) return;
+      const mine = run;
+      let heard = false;
+      source = new EventSource(`${API}/stream/${NS}/${key}`);
+
+      source.onmessage = (event) => {
+        let value;
+        try {
+          value = JSON.parse(event.data).value;
+        } catch {
+          return;
+        }
+        if (!Number.isInteger(value) || value < 0) return;
+        heard = true;
+        failures = 0;
+        onHealth(true);
+        onValue(value);
+        // Nothing for a few minutes may mean the line died quietly; redial.
+        after(180000 + Math.random() * 60000, listen);
+      };
+
+      // Turned away or cut off. Redial here, spaced out, rather than letting
+      // every phone retry on the browser's fixed three-second beat.
+      source.onerror = () => {
+        failures++;
+        onHealth(false);
+        stop();
+        after(Math.min(8000, 2000 * 1.6 ** failures) + Math.random() * 2000, listen);
+      };
+
+      // A stream says nothing until its value exists, and some networks hold
+      // streams back altogether. If this one stays quiet, ask outright (and
+      // rarely, see the note on polling above), leaving the line open in case
+      // it does come through.
+      const ask = async () => {
+        let value = null;
+        try {
+          value = await withRetry(() => read(key), 3000);
+        } catch {
+          // Ask again next time round.
+        }
+        if (mine !== run || heard) return;
+        if (value !== null) {
+          onHealth(true);
+          onValue(value);
+        }
+        after(30000 + Math.random() * 15000, ask);
+      };
+      after(6000, ask);
+    }
+
+    document.addEventListener("visibilitychange", listen);
+    listen();
+
+    return () => {
+      document.removeEventListener("visibilitychange", listen);
+      stop();
+    };
+  }
+
+  const watchState = (onState, onHealth) => watch("state", (value) => onState(decode(value)), onHealth);
+  const watchCount = (session, onCount, onHealth) => watch("checkin-" + session, onCount, onHealth);
+
   function clampGroups(value) {
     const n = parseInt(value, 10);
     if (!Number.isFinite(n)) return null;
@@ -120,6 +208,8 @@
     MIN_GROUPS,
     MAX_GROUPS,
     getState,
+    watchState,
+    watchCount,
     takeNumber,
     clampGroups,
     groupFor,
