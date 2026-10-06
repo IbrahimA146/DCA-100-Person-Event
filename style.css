@@ -477,3 +477,41 @@ form .primary[disabled]::after,
   overflow-wrap: anywhere;
 }
 
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  margin-left: 0.6em;
+  letter-spacing: 0.08em;
+  color: var(--sage);
+}
+
+.status::before {
+  content: "";
+  width: 0.55em;
+  height: 0.55em;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.status.down {
+  color: var(--wine);
+}
+
+.count {
+  margin: 0.5rem 0 0;
+  font-family: var(--numeral);
+  font-weight: 400;
+  font-size: 6rem;
+  line-height: 1;
+  color: var(--wine);
+}
+
+.count-label {
+  margin: 0.2rem 0 0;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 1.15rem;
+  color: var(--ink-soft);
+}
+

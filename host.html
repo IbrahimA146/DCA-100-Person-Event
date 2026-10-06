@@ -23,11 +23,22 @@
       <p class="url" id="url"></p>
       <button class="primary no-print" id="print" type="button">Print this sign</button>
     </section>
+
+    <section class="card no-print">
+      <p class="eyebrow">Host view <span class="status" id="status">Connecting</span></p>
+      <p class="count" id="count">&ndash;</p>
+      <p class="count-label">signed in</p>
+    </section>
   </main>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
   <script>
     const $ = (id) => document.getElementById(id);
+
+    let state = null; // { session, groups }: what guests' phones are going by
+    let count = null;
 
     function drawQr() {
       const url = new URL("./", location.href).href;
@@ -42,7 +53,45 @@
       $("qr").innerHTML = qr.createSvgTag({ cellSize: 8, margin: 0, scalable: true });
     }
 
+    function render() {
+      $("count").textContent = count === null ? "–" : count;
+    }
+
+    // Two live lines feed this page: the state and the sign-in tally.
+    const lines = {};
+
+    function setHealth(line, up) {
+      lines[line] = up;
+      const down = Object.values(lines).includes(false);
+      $("status").classList.toggle("down", down);
+      $("status").textContent = down ? "Reconnecting" : "Live";
+    }
+
+    let stopCount = null;
+
+    function applyState(next) {
+      const moved = !state || state.session !== next.session;
+      state = next;
+      // A new session has its own tally; listen to that one instead.
+      if (moved) {
+        if (stopCount) stopCount();
+        count = null;
+        stopCount = TCN.watchCount(
+          next.session,
+          (signedIn) => {
+            count = signedIn;
+            render();
+          },
+          (up) => setHealth("count", up)
+        );
+      }
+      render();
+    }
+
+    TCN.watchState(applyState, (up) => setHealth("state", up));
+
     drawQr();
+    render();
   </script>
 </body>
 </html>
