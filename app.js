@@ -1,4 +1,16 @@
 // Shared by index.html (guests) and host.html (organisers).
+//
+// Everything the pages share lives in two values on a free counter service:
+//
+//   state        session * 100 + groups. `groups` is how many groups the host
+//                has announced (0 = not yet). `session` goes up by one each
+//                time the host starts over. Only the host page can write it.
+//   checkin-<s>  how many people have signed in during session s. Signing in
+//                adds one and hands that person the new total as their number.
+//
+// A guest's group is worked out from their number and the announced group
+// count, so the host can pick the count after seeing who turned up, and
+// anyone who signs in later lands in a group straight away.
 (function () {
   const CFG = window.TCN_CONFIG;
   const API = "https://abacus.jasoncameron.dev";
@@ -50,7 +62,27 @@
     }
   }
 
+  async function read(key) {
+    try {
+      return numberIn(await request(`get/${NS}/${key}`));
+    } catch (err) {
+      // A value nobody has written yet simply doesn't exist.
+      if (err.status === 404) return 0;
+      throw err;
+    }
+  }
+
+  const decode = (value) => ({ session: Math.floor(value / 100), groups: value % 100 });
+  const encode = (session, groups) => session * 100 + groups;
+
+  const getState = (patience) => withRetry(() => read("state"), patience).then(decode);
+  // Patient enough to sit out a couple of walls in a doorway rush.
+  const takeNumber = (session) =>
+    withRetry(() => request(`hit/${NS}/checkin-${session}`).then(numberIn), 20000);
+
   window.TCN = {
     config: CFG,
+    getState,
+    takeNumber,
   };
 })();
