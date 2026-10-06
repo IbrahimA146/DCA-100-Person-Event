@@ -24,5 +24,25 @@
       <button class="primary no-print" id="print" type="button">Print this sign</button>
     </section>
   </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    function drawQr() {
+      const url = new URL("./", location.href).href;
+      $("url").textContent = url.replace(/^https?:\/\//, "");
+      if (typeof qrcode !== "function") {
+        $("qr").textContent = "The QR code couldn't load. Check the connection and refresh.";
+        return;
+      }
+      const qr = qrcode(0, "M");
+      qr.addData(url);
+      qr.make();
+      $("qr").innerHTML = qr.createSvgTag({ cellSize: 8, margin: 0, scalable: true });
+    }
+
+    drawQr();
+  </script>
 </body>
 </html>
