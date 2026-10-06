@@ -69,5 +69,83 @@
   </main>
 
   <p class="colophon">Dialogue Student Association · UT Austin</p>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+  <script>
+    const STORE = "tcn:guests";
+    const KEEP_FOR = 18 * 60 * 60 * 1000;
+    const cfg = TCN.config;
+    const $ = (id) => document.getElementById(id);
+
+    // Everyone signed in on this phone tonight, newest last.
+    function loadGuests() {
+      try {
+        const list = JSON.parse(localStorage.getItem(STORE));
+        return Array.isArray(list) ? list.filter((guest) => Date.now() - guest.at < KEEP_FOR) : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveGuests() {
+      try {
+        localStorage.setItem(STORE, JSON.stringify(guests));
+      } catch {
+        // Private browsing: everything still shows, it just won't survive a refresh.
+      }
+    }
+
+    let guests = loadGuests();
+    let state = null; // { session, groups } once the counter has been heard from
+    let adding = false; // the form is open to sign in one more person
+
+    const announced = () => Boolean(state) && state.groups >= TCN.MIN_GROUPS;
+
+    // `ticket` stands in for a number when the counter couldn't be reached.
+    const groupOf = (guest) => TCN.groupFor(guest.number || guest.ticket, state.groups, state.session);
+
+    function render(animate) {
+      const showForm = adding || guests.length === 0;
+      $("signin").hidden = !showForm;
+      $("signed").hidden = showForm;
+      $("back").hidden = guests.length === 0;
+      if (showForm) return;
+
+      const latest = guests[guests.length - 1];
+      const known = announced();
+      $("guest").textContent = latest.name;
+      $("eyebrow").textContent = known ? "Welcome" : "Signed in";
+      $("lead").textContent = known ? "you’re in" : "you’re on the list";
+      $("label").textContent = cfg.groupLabel;
+      $("number").textContent = known ? groupOf(latest) : "";
+      $("label").hidden = $("number").hidden = !known;
+      $("wait").hidden = known;
+      $("note").textContent = known
+        ? "Find your group and enjoy the evening."
+        : "Your group will appear right here once everyone has arrived. No need to scan again.";
+
+      const earlier = guests.slice(0, -1).reverse();
+      $("others").replaceChildren(
+        ...earlier.map((guest) => {
+          const item = document.createElement("li");
+          const name = document.createElement("b");
+          name.textContent = guest.name;
+          item.append(name, known ? ` · ${cfg.groupLabel} ${groupOf(guest)}` : " · signed in");
+          return item;
+        })
+      );
+      $("others").hidden = earlier.length === 0;
+
+      // Restart the entrance animation when there's something new to show.
+      $("signed").classList.remove("reveal");
+      if (animate) {
+        void $("signed").offsetWidth;
+        $("signed").classList.add("reveal");
+      }
+    }
+
+    render(false);
+  </script>
 </body>
 </html>
