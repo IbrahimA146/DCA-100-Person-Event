@@ -1,0 +1,56 @@
+:root {
+  color-scheme: light;
+
+  --cream: #f1e6d3;
+  --cream-light: #f9f1e2;
+  --paper: #fbf5e9;
+  --ink: #33231a;
+  --ink-soft: #7b6656;
+  --line: #dccbb1;
+  --wine: #801828;
+  --wine-deep: #661220;
+  --stain: #7a4a2b;
+  --sage: #5d7a4f;
+
+  --serif: "Fraunces", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+
+  /* Paper texture: fine grain, plus slow uneven blotches like aged stock. */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .32 0 0 0 0 .2 0 0 0 0 .1 0 0 0 .55 -.12'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  --mottle: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.012' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .55 0 0 0 0 .36 0 0 0 0 .18 0 0 0 .5 -.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23m)'/%3E%3C/svg%3E");
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  padding: max(1rem, env(safe-area-inset-top)) 1rem max(1rem, env(safe-area-inset-bottom));
+  font-family: var(--sans);
+  color: var(--ink);
+  background-color: var(--cream);
+  background-image:
+    var(--grain),
+    var(--mottle),
+    radial-gradient(120% 70% at 50% 0%, var(--cream-light) 0%, transparent 65%),
+    radial-gradient(80% 50% at 100% 100%, rgba(184, 80, 0, 0.07), transparent 70%);
+}
+
+[hidden] {
+  display: none !important;
+}
+
