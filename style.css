@@ -103,3 +103,55 @@ h1 em {
   color: var(--wine);
 }
 
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.1rem auto 1.25rem;
+  width: 78%;
+  color: #b3906f;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.55;
+}
+
+.divider svg {
+  width: 2rem;
+  height: 2rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.steam path {
+  animation: steam 3.2s ease-in-out infinite;
+}
+
+.steam path:nth-child(2) {
+  animation-delay: 0.5s;
+}
+
+.steam path:nth-child(3) {
+  animation-delay: 1s;
+}
+
+@keyframes steam {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: translateY(1.5px);
+  }
+  50% {
+    opacity: 0.95;
+    transform: translateY(-1.5px);
+  }
+}
+
