@@ -515,3 +515,48 @@ form .primary[disabled]::after,
   color: var(--ink-soft);
 }
 
+.stepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin: 1.5rem 0 0;
+  padding-top: 1.25rem;
+  border-top: 1px dashed var(--line);
+}
+
+.stepper button {
+  width: 2.75rem;
+  height: 2.75rem;
+  font-size: 1.4rem;
+  line-height: 1;
+  color: var(--wine);
+  background: #fffdf8;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+}
+
+.stepper button:hover {
+  border-color: var(--wine);
+}
+
+.stepper button[disabled] {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.stepper output {
+  min-width: 2ch;
+  font-family: var(--numeral);
+  font-weight: 400;
+  font-size: 2rem;
+}
+
+.split {
+  margin: 0.9rem 0 0;
+  font-family: var(--serif);
+  font-size: 1.3rem;
+  font-weight: 600;
+  font-variant-numeric: lining-nums;
+}
+

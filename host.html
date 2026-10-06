@@ -28,6 +28,14 @@
       <p class="eyebrow">Host view <span class="status" id="status">Connecting</span></p>
       <p class="count" id="count">&ndash;</p>
       <p class="count-label">signed in</p>
+
+      <div class="stepper">
+        <span class="eyebrow">Groups</span>
+        <button id="fewer" type="button" aria-label="One group fewer">&minus;</button>
+        <output id="groups"></output>
+        <button id="more" type="button" aria-label="One more group">+</button>
+      </div>
+      <p class="split" id="split"></p>
     </section>
   </main>
 
@@ -35,8 +43,19 @@
   <script src="config.js"></script>
   <script src="app.js"></script>
   <script>
+    const STORE = "tcn:host-groups";
+    const cfg = TCN.config;
     const $ = (id) => document.getElementById(id);
 
+    function remembered() {
+      try {
+        return TCN.clampGroups(localStorage.getItem(STORE));
+      } catch {
+        return null;
+      }
+    }
+
+    let picked = remembered(); // the number on the stepper
     let state = null; // { session, groups }: what guests' phones are going by
     let count = null;
 
@@ -54,7 +73,22 @@
     }
 
     function render() {
+      const live = state ? state.groups : 0;
+      if (picked === null && live >= TCN.MIN_GROUPS) picked = live;
+      const shown = picked || TCN.clampGroups(cfg.groups) || 10;
+
       $("count").textContent = count === null ? "–" : count;
+      $("groups").textContent = shown;
+      $("fewer").disabled = shown <= TCN.MIN_GROUPS;
+      $("more").disabled = shown >= TCN.MAX_GROUPS;
+
+      // People are dealt out evenly, so sizes follow from the count alone.
+      const low = Math.floor((count || 0) / shown);
+      const high = Math.ceil((count || 0) / shown);
+      $("split").hidden = !count;
+      $("split").textContent = low === 0
+        ? "Fewer people than groups so far"
+        : `${shown} groups of ${low === high ? low : `${low}–${high}`}`;
     }
 
     // Two live lines feed this page: the state and the sign-in tally.
@@ -89,6 +123,19 @@
     }
 
     TCN.watchState(applyState, (up) => setHealth("state", up));
+
+    function pick(next) {
+      picked = TCN.clampGroups(next);
+      try {
+        localStorage.setItem(STORE, picked);
+      } catch {
+        // Not remembered across refreshes; everything else still works.
+      }
+      render();
+    }
+
+    $("fewer").addEventListener("click", () => pick(Number($("groups").textContent) - 1));
+    $("more").addEventListener("click", () => pick(Number($("groups").textContent) + 1));
 
     drawQr();
     render();

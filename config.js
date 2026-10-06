@@ -1,6 +1,10 @@
 // Tea & Coffee Night settings.
 // Edit a value, commit, and the live site picks it up in about a minute.
 window.TCN_CONFIG = {
+  // Where the group picker on host.html starts. The real number is chosen
+  // there on the night, once you can see how many people signed in.
+  groups: 10,
+
   // Word shown above the number: "Group", "Table", "Circle"...
   groupLabel: "Group",
 
