@@ -212,6 +212,17 @@
     }
   }
 
+  // An empty sign-in list with the groups hidden. The new tally is made up
+  // front so the host's live count has something to listen to from the start.
+  async function startSession(session) {
+    try {
+      await post(`create/${NS}/checkin-${session}?initializer=0`);
+    } catch (err) {
+      if (err.status !== 409) throw err; // 409: it's already there
+    }
+    await setState(session, 0);
+  }
+
   function clampGroups(value) {
     const n = parseInt(value, 10);
     if (!Number.isFinite(n)) return null;
@@ -250,6 +261,7 @@
     MAX_GROUPS,
     getState,
     setState,
+    startSession,
     watchState,
     watchCount,
     takeNumber,

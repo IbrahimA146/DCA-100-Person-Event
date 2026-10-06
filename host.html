@@ -41,6 +41,7 @@
       <p class="hint" id="hint"></p>
 
       <button class="link" id="hide" type="button" hidden>Hide groups again</button>
+      <button class="link" id="reset" type="button">Start over with an empty list</button>
     </section>
   </main>
 
@@ -184,6 +185,16 @@
       if (!state || busy) return;
       const { session } = state;
       publish(() => TCN.setState(session, 0), { session, groups: 0 });
+    });
+
+    $("reset").addEventListener("click", () => {
+      if (!state || busy) return;
+      const answer = prompt(
+        "This empties the sign-in list and hides the groups, ready for a fresh start.\nType RESET to confirm."
+      );
+      if (answer !== "RESET") return;
+      const session = state.session + 1;
+      publish(() => TCN.startSession(session), { session, groups: 0 });
     });
 
     drawQr();
