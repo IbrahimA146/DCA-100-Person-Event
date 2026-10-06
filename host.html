@@ -172,6 +172,7 @@
 
     $("fewer").addEventListener("click", () => pick(Number($("groups").textContent) - 1));
     $("more").addEventListener("click", () => pick(Number($("groups").textContent) + 1));
+    $("print").addEventListener("click", () => window.print());
 
     $("announce").addEventListener("click", () => {
       if (!state || busy) return;

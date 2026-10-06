@@ -593,3 +593,32 @@ form .primary[disabled]::after,
   }
 }
 
+/* Printing host.html gives a one-page door sign: logo, title, QR. */
+@media print {
+  body {
+    background: #fff;
+    justify-content: flex-start;
+    padding-top: 12vh;
+  }
+
+  .no-print,
+  .colophon {
+    display: none !important;
+  }
+
+  .host-wrap {
+    display: block;
+    width: 100%;
+  }
+
+  .host-wrap .card {
+    margin: 0 auto;
+    width: 30rem;
+    padding: 3rem 2rem;
+    box-shadow: none;
+  }
+
+  .qr {
+    width: 20rem;
+  }
+}
