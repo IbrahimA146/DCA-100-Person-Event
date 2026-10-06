@@ -40,6 +40,32 @@
       <button class="primary" id="go" type="submit">Sign in</button>
       <button class="link" id="back" type="button" hidden>Back</button>
     </form>
+
+    <!-- After signing in: first "on the list", then the group once the host announces them. -->
+    <section id="signed" aria-live="polite" hidden>
+      <p class="eyebrow" id="eyebrow"></p>
+      <p class="guest" id="guest"></p>
+      <p class="youre-in" id="lead"></p>
+      <div class="ring">
+        <svg viewBox="0 0 240 240" aria-hidden="true">
+          <filter id="spill" x="-10%" y="-10%" width="120%" height="120%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="3" seed="4"/>
+            <feDisplacementMap in="SourceGraphic" scale="7"/>
+          </filter>
+          <g filter="url(#spill)" fill="none" stroke="#7a4a2b">
+            <circle cx="120" cy="120" r="100" stroke-width="5" opacity="0.26"/>
+            <circle cx="120" cy="120" r="94" stroke-width="1.5" opacity="0.34"/>
+            <circle cx="122" cy="119" r="105" stroke-width="1" opacity="0.2"/>
+          </g>
+        </svg>
+        <span class="ring-label" id="label"></span>
+        <span class="ring-number" id="number"></span>
+        <span class="ring-wait" id="wait">Steeping</span>
+      </div>
+      <p class="note" id="note"></p>
+      <ul class="others" id="others" hidden></ul>
+      <button class="link" id="another" type="button">Signing in a friend too?</button>
+    </section>
   </main>
 
   <p class="colophon">Dialogue Student Association · UT Austin</p>
