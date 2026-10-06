@@ -254,6 +254,14 @@ button {
   outline-offset: 2px;
 }
 
+/* host page: nothing to do right now, so the button reads as a status line */
+.primary[disabled] {
+  cursor: default;
+  color: var(--wine);
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
 /* sign-in form: working on it */
 form .primary[disabled] {
   cursor: progress;
@@ -558,5 +566,13 @@ form .primary[disabled]::after,
   font-size: 1.3rem;
   font-weight: 600;
   font-variant-numeric: lining-nums;
+}
+
+.hint {
+  margin: 0.7rem 0 0;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+  text-wrap: balance;
 }
 

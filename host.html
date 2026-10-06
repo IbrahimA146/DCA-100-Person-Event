@@ -36,6 +36,11 @@
         <button id="more" type="button" aria-label="One more group">+</button>
       </div>
       <p class="split" id="split"></p>
+
+      <button class="primary" id="announce" type="button"></button>
+      <p class="hint" id="hint"></p>
+
+      <button class="link" id="hide" type="button" hidden>Hide groups again</button>
     </section>
   </main>
 
@@ -58,6 +63,7 @@
     let picked = remembered(); // the number on the stepper
     let state = null; // { session, groups }: what guests' phones are going by
     let count = null;
+    let busy = false; // a change is on its way to the phones
 
     function drawQr() {
       const url = new URL("./", location.href).href;
@@ -89,6 +95,20 @@
       $("split").textContent = low === 0
         ? "Fewer people than groups so far"
         : `${shown} groups of ${low === high ? low : `${low}–${high}`}`;
+
+      $("announce").disabled = busy || !state || live === shown;
+      $("announce").textContent = busy
+        ? "Sending to phones"
+        : !live
+          ? "Show groups on phones"
+          : live === shown
+            ? `Phones are showing ${live} groups`
+            : `Change to ${shown} groups`;
+      $("hide").hidden = !live;
+
+      $("hint").textContent = !live
+        ? "Press once most people have signed in. Anyone who signs in afterwards is placed in a group straight away."
+        : "Latecomers are placed automatically. Changing the number now moves people between groups.";
     }
 
     // Two live lines feed this page: the state and the sign-in tally.
@@ -124,6 +144,21 @@
 
     TCN.watchState(applyState, (up) => setHealth("state", up));
 
+    // Sends a change to the phones, then shows it here without waiting to
+    // hear it back.
+    async function publish(change, next) {
+      busy = true;
+      render();
+      try {
+        await change();
+        applyState(next);
+      } catch {
+        alert("That didn't go through. Check the connection and try again.");
+      }
+      busy = false;
+      render();
+    }
+
     function pick(next) {
       picked = TCN.clampGroups(next);
       try {
@@ -136,6 +171,20 @@
 
     $("fewer").addEventListener("click", () => pick(Number($("groups").textContent) - 1));
     $("more").addEventListener("click", () => pick(Number($("groups").textContent) + 1));
+
+    $("announce").addEventListener("click", () => {
+      if (!state || busy) return;
+      const { session, groups: live } = state;
+      const groups = Number($("groups").textContent);
+      if (live && !confirm(`Change from ${live} to ${groups} groups? People will be moved between groups.`)) return;
+      publish(() => TCN.setState(session, groups), { session, groups });
+    });
+
+    $("hide").addEventListener("click", () => {
+      if (!state || busy) return;
+      const { session } = state;
+      publish(() => TCN.setState(session, 0), { session, groups: 0 });
+    });
 
     drawQr();
     render();
