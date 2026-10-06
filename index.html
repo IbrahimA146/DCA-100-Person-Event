@@ -77,6 +77,7 @@
     const KEEP_FOR = 18 * 60 * 60 * 1000;
     const cfg = TCN.config;
     const $ = (id) => document.getElementById(id);
+    const sleep = (ms) => new Promise((done) => setTimeout(done, ms));
 
     // Everyone signed in on this phone tonight, newest last.
     function loadGuests() {
@@ -144,6 +145,59 @@
         $("signed").classList.add("reveal");
       }
     }
+
+    let slowTimer;
+
+    function setBusy(busy) {
+      $("go").disabled = busy;
+      $("name").readOnly = busy;
+      $("go").textContent = busy ? "Steeping" : "Sign in";
+      // In a rush at the door there can be a short queue for a number.
+      clearTimeout(slowTimer);
+      if (busy) slowTimer = setTimeout(() => ($("go").textContent = "Almost there"), 4000);
+    }
+
+    $("signin").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if ($("go").disabled) return;
+
+      const name = $("name").value.trim().replace(/\s+/g, " ");
+      $("error").hidden = Boolean(name);
+      if (!name) {
+        $("name").focus();
+        return;
+      }
+
+      setBusy(true);
+      const started = Date.now();
+
+      if (!state) state = await TCN.getState(11000).catch(() => null);
+
+      let number = null;
+      if (state) {
+        try {
+          number = await TCN.takeNumber(state.session);
+        } catch {
+          // Counter unreachable. Nobody should be stuck at the door, so they
+          // get a random ticket instead and are still placed in a group.
+        }
+      }
+
+      guests.push({
+        name,
+        number,
+        ticket: 1 + Math.floor(Math.random() * 1e6),
+        session: number ? state.session : null,
+        at: Date.now(),
+      });
+      saveGuests();
+
+      await sleep(Math.max(0, 900 - (Date.now() - started)));
+      setBusy(false);
+      $("name").value = "";
+      adding = false;
+      render(true);
+    });
 
     render(false);
   </script>

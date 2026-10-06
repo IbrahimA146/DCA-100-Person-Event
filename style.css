@@ -254,6 +254,31 @@ button {
   outline-offset: 2px;
 }
 
+/* sign-in form: working on it */
+form .primary[disabled] {
+  cursor: progress;
+  color: #fdf6ea;
+  background: #9a5560;
+  box-shadow: none;
+}
+
+form .primary[disabled]::after,
+.ring-wait::after {
+  content: "...";
+  display: inline-block;
+  animation: dots 1.4s steps(4, jump-none) infinite;
+}
+
+/* uncovers the three dots one at a time, without the text shifting */
+@keyframes dots {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
 /* ---------- result ---------- */
 
 .guest {
