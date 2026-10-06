@@ -576,3 +576,11 @@ form .primary[disabled]::after,
   text-wrap: balance;
 }
 
+@media (min-width: 52rem) {
+  .host-wrap {
+    width: min(100%, 56rem);
+    grid-template-columns: 24rem minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
