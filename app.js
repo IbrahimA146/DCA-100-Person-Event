@@ -15,6 +15,7 @@
   const CFG = window.TCN_CONFIG;
   const API = "https://abacus.jasoncameron.dev";
   const NS = CFG.counterNamespace;
+  const TOKEN_STORE = "tcn:host-token";
 
   const MIN_GROUPS = 2;
   const MAX_GROUPS = 40;
@@ -171,6 +172,46 @@
   const watchState = (onState, onHealth) => watch("state", (value) => onState(decode(value)), onHealth);
   const watchCount = (session, onCount, onHealth) => watch("checkin-" + session, onCount, onHealth);
 
+  function savedToken() {
+    try {
+      return localStorage.getItem(TOKEN_STORE);
+    } catch {
+      return null;
+    }
+  }
+
+  const post = (path, token) =>
+    withRetry(
+      () => request(path, { method: "POST", headers: token ? { Authorization: "Bearer " + token } : {} }),
+      12000
+    );
+
+  // The service guards `state` with a token so only the host page can change
+  // it: the one in config.js, or one this browser was handed when it had to
+  // make the value afresh (the service forgets values left untouched for
+  // about six months).
+  async function setState(session, groups) {
+    const value = encode(session, groups);
+
+    for (const token of [savedToken(), CFG.hostToken].filter(Boolean)) {
+      try {
+        await post(`set/${NS}/state?value=${value}`, token);
+        return;
+      } catch (err) {
+        if (err.status === 401) continue; // not the token for this value; try the other
+        if (err.status !== 400) throw err; // 400: the value doesn't exist yet
+        break;
+      }
+    }
+
+    const made = await post(`create/${NS}/state?initializer=${value}`);
+    try {
+      localStorage.setItem(TOKEN_STORE, made.admin_key);
+    } catch {
+      // Without storage this browser can't change it again; a reload will retry.
+    }
+  }
+
   function clampGroups(value) {
     const n = parseInt(value, 10);
     if (!Number.isFinite(n)) return null;
@@ -208,6 +249,7 @@
     MIN_GROUPS,
     MAX_GROUPS,
     getState,
+    setState,
     watchState,
     watchCount,
     takeNumber,
