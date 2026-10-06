@@ -16,6 +16,9 @@
   const API = "https://abacus.jasoncameron.dev";
   const NS = CFG.counterNamespace;
 
+  const MIN_GROUPS = 2;
+  const MAX_GROUPS = 40;
+
   const sleep = (ms) => new Promise((done) => setTimeout(done, ms));
 
   async function request(path, options) {
@@ -80,9 +83,45 @@
   const takeNumber = (session) =>
     withRetry(() => request(`hit/${NS}/checkin-${session}`).then(numberIn), 20000);
 
+  function clampGroups(value) {
+    const n = parseInt(value, 10);
+    if (!Number.isFinite(n)) return null;
+    return Math.min(MAX_GROUPS, Math.max(MIN_GROUPS, n));
+  }
+
+  function mulberry32(seed) {
+    let a = seed | 0;
+    return function () {
+      a = (a + 0x6d2b79f5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  // Which group the nth person to sign in belongs to. People are dealt out in
+  // rounds: each round hands every group exactly one person, in a freshly
+  // shuffled order. So who lands where is unpredictable, but group sizes
+  // never differ by more than one, however many people turn up.
+  function groupFor(n, groups, session) {
+    const round = Math.floor((n - 1) / groups);
+    const seat = (n - 1) % groups;
+    const rand = mulberry32(Math.imul(session + 1, 2654435761) ^ Math.imul(round + 1, 40503) ^ groups);
+    const order = Array.from({ length: groups }, (_, k) => k + 1);
+    for (let k = groups - 1; k > 0; k--) {
+      const j = Math.floor(rand() * (k + 1));
+      [order[k], order[j]] = [order[j], order[k]];
+    }
+    return order[seat];
+  }
+
   window.TCN = {
     config: CFG,
+    MIN_GROUPS,
+    MAX_GROUPS,
     getState,
     takeNumber,
+    clampGroups,
+    groupFor,
   };
 })();
