@@ -79,6 +79,15 @@
     const $ = (id) => document.getElementById(id);
     const sleep = (ms) => new Promise((done) => setTimeout(done, ms));
 
+    // Adding ?reset to the link forgets this phone's sign-ins (handy when testing).
+    if (new URLSearchParams(location.search).has("reset")) {
+      try {
+        localStorage.removeItem(STORE);
+      } catch {
+        // Nothing stored, nothing to forget.
+      }
+    }
+
     // Everyone signed in on this phone tonight, newest last.
     function loadGuests() {
       try {
