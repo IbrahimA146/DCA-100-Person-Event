@@ -210,6 +210,17 @@
       render(true);
     });
 
+    $("another").addEventListener("click", () => {
+      adding = true;
+      render(false);
+      $("name").focus();
+    });
+
+    $("back").addEventListener("click", () => {
+      adding = false;
+      render(false);
+    });
+
     render(false);
   </script>
 </body>

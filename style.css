@@ -279,6 +279,27 @@ form .primary[disabled]::after,
   }
 }
 
+.link {
+  display: block;
+  margin: 1.1rem auto 0;
+  padding: 0.4rem 0.5rem;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  background: none;
+  border: 0;
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  text-underline-offset: 3px;
+}
+
+.link:hover {
+  color: var(--wine);
+}
+
+.link + .link {
+  margin-top: 0.15rem;
+}
+
 /* ---------- result ---------- */
 
 .guest {
@@ -352,6 +373,24 @@ form .primary[disabled]::after,
   line-height: 1.45;
   color: var(--ink-soft);
   text-wrap: balance;
+}
+
+.others {
+  margin: 1.1rem 0 0;
+  padding: 0.9rem 0 0;
+  list-style: none;
+  border-top: 1px dashed var(--line);
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+}
+
+.others li + li {
+  margin-top: 0.3rem;
+}
+
+.others b {
+  color: var(--ink);
+  font-weight: 600;
 }
 
 .colophon {
